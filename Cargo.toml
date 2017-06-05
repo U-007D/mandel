@@ -4,6 +4,7 @@ name = "mandel"
 version = "0.1.0"
 
 [dependencies]
+crossbeam = "0.2.10"
 image = "0.13.0"
 num = "0.1.37"
 
