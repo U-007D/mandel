@@ -1,5 +1,5 @@
 [package]
-name = "NewRustProject"
+name = "mandel"
 version = "0.1.0"
 authors = ["bRad <brad@humanenginuity.com>"]
 

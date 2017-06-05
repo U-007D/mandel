@@ -4,7 +4,7 @@
 #![warn(missing_debug_implementations, missing_copy_implementations, trivial_casts, trivial_numeric_casts, unused_import_braces, unused_qualifications)]
 #![deny(unused_must_use, overflowing_literals)]
 
-extern crate NewRustProject;
+extern crate mandel;
 mod consts;
 use consts::msgs;
 
@@ -16,7 +16,7 @@ pub fn main() {
         _ => msgs::UNKNOWN_APP_NAME.to_string(),
     };
 
-    match NewRustProject::lib_main(args) {
+    match mandel::lib_main(args) {
         Err(e) => panic!(format!("{}: {}: {}", app_name, msgs::ERROR, e.description())),
         _ => (),
     }
