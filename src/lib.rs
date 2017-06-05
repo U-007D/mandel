@@ -6,12 +6,13 @@
 
 extern crate num;
 extern crate image;
-extern crate crossbeam;
+extern crate rayon;
 
 use std::io::Write;
 use std::str::FromStr;
 
 use num::Complex;
+use rayon::prelude::*;
 
 type GeneralError = Box<std::error::Error>;
 type GeneralResult<T> = Result<T, GeneralError>;
@@ -37,23 +38,23 @@ pub fn run(_args: Vec<String>) -> GeneralResult<()> {
     let lower_right = parse_pair(&_args[4], ',')
         .expect("error parsing lower right corner point");
     let mut pixels = vec![0; bounds.0 * bounds.1];
-    let threads = 8;
-    let band_rows = bounds.1 / threads + 1;
+    // Scope of slicing up `pixels` into horizontal bands.
     {
-        let bands: Vec<&mut [u8]> = pixels.chunks_mut(band_rows * bounds.0).collect();
-        crossbeam::scope(|scope| {
-            for (i, band) in bands.into_iter().enumerate() {
-                let top = band_rows * i;
-                let height = band.len() / bounds.0;
-                let band_bounds = (bounds.0, height);
-                let band_upper_left = pixel_to_point(bounds, (0, top),
-                                                     upper_left, lower_right);
-                let band_lower_right = pixel_to_point(bounds, (bounds.0, top + height),
+        let bands: Vec<(usize, &mut [u8])> = pixels
+            .chunks_mut(bounds.0)
+            .enumerate()
+            .collect();
+        bands.into_par_iter()
+             .weight_max()
+             .for_each(|(i, band)| {
+                 let top = i;
+                 let band_bounds = (bounds.0, 1);
+                 let band_upper_left = pixel_to_point(bounds, (0, top),
                                                       upper_left, lower_right);
-                scope.spawn(move || {
-                    render(band, band_bounds, band_upper_left, band_lower_right);
-                }); }
-        });
+                 let band_lower_right = pixel_to_point(bounds, (bounds.0, top + 1),
+                                                       upper_left, lower_right);
+                 render(band, band_bounds, band_upper_left, band_lower_right);
+             });
     }
     write_bitmap(&_args[1], &pixels, bounds).expect("error writing PNG file");
     Ok(())
