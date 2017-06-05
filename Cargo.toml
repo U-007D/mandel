@@ -1,10 +1,14 @@
 [package]
+authors = ["bRad <brad@humanenginuity.com>"]
 name = "mandel"
 version = "0.1.0"
-authors = ["bRad <brad@humanenginuity.com>"]
 
 [dependencies]
+image = "0.13.0"
+num = "0.1.37"
+
+[profile]
 
 [profile.release]
-opt-level = 3
 lto = true
+opt-level = 3

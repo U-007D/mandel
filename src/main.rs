@@ -5,19 +5,21 @@
 #![deny(unused_must_use, overflowing_literals)]
 
 extern crate mandel;
-mod consts;
-use consts::msgs;
+
+pub const INVALID_UTF8_ARG: &'static str            = "Invalid UTF-8 argument found.  Processing aborted.";
+pub const UNKNOWN_APP_NAME: &'static str            = "<Unknown app name>";
+pub const ERROR: &'static str                       = "Error";
 
 pub fn main() {
-    let args = std::env::args_os().map(|arg| arg.into_string().expect(msgs::INVALID_UTF8_ARG))
+    let args = std::env::args_os().map(|arg| arg.into_string().expect(INVALID_UTF8_ARG))
                                   .collect::<Vec<_>>();
     let app_name = match args.first() {
         Some(name) => name.to_string(),
-        _ => msgs::UNKNOWN_APP_NAME.to_string(),
+        _ => UNKNOWN_APP_NAME.to_string(),
     };
 
-    match mandel::lib_main(args) {
-        Err(e) => panic!(format!("{}: {}: {}", app_name, msgs::ERROR, e.description())),
+    match mandel::run(args) {
+        Err(e) => panic!(format!("{}: {}: {}", app_name, ERROR, e.description())),
         _ => (),
     }
 }
