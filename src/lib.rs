@@ -7,12 +7,14 @@
 extern crate num;
 extern crate image;
 extern crate rayon;
+extern crate time;
 
 use std::io::Write;
 use std::str::FromStr;
 
 use num::Complex;
 use rayon::prelude::*;
+use time::PreciseTime;
 
 type GeneralError = Box<std::error::Error>;
 type GeneralResult<T> = Result<T, GeneralError>;
@@ -38,6 +40,8 @@ pub fn run(_args: Vec<String>) -> GeneralResult<()> {
     let lower_right = parse_pair(&_args[4], ',')
         .expect("error parsing lower right corner point");
     let mut pixels = vec![0; bounds.0 * bounds.1];
+
+    let beg = PreciseTime::now();
     // Scope of slicing up `pixels` into horizontal bands.
     {
         let bands: Vec<(usize, &mut [u8])> = pixels
@@ -56,6 +60,8 @@ pub fn run(_args: Vec<String>) -> GeneralResult<()> {
                  render(band, band_bounds, band_upper_left, band_lower_right);
              });
     }
+    let end = PreciseTime::now();
+    println!("{} ms", beg.to(end).num_milliseconds());
     write_bitmap(&_args[1], &pixels, bounds).expect("error writing PNG file");
     Ok(())
 }
